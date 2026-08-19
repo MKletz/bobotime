@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bobo Time™ Calculator</title>
+  <style>
+    :root {
+      --bg: #121214;
+      --card-bg: #1e1e24;
+      --accent: #ff4757;
+      --accent-hover: #ff6b81;
+      --text: #f1f2f6;
+      --muted: #a4b0be;
+      --border: #2ed573;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      background-color: var(--card-bg);
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      max-width: 450px;
+      width: 100%;
+      border: 1px solid #2f3542;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      text-align: center;
+      margin-bottom: 8px;
+      color: var(--accent);
+    }
+
+    p.subtitle {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-bottom: 24px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    input[type="time"], input[type="number"], select {
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid #485460;
+      background-color: #2f3542;
+      color: #fff;
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input[type="time"]:focus, input[type="number"]:focus, select:focus {
+      border-color: var(--accent);
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      background-color: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    button:hover {
+      background-color: var(--accent-hover);
+    }
+
+    .result-box {
+      margin-top: 24px;
+      padding: 20px;
+      background-color: #2f3542;
+      border-radius: 8px;
+      border-left: 5px solid var(--border);
+      display: none;
+    }
+
+    .result-time {
+      font-size: 1.6rem;
+      font-weight: bold;
+      color: var(--border);
+      margin: 8px 0;
+    }
+
+    .quote {
+      font-style: italic;
+      color: var(--muted);
+      font-size: 0.85rem;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>Bobo Time™ Calculator</h1>
+    <p class="subtitle">Factor in Mom-laxation physics before it's too late.</p>
+
+    <div class="form-group">
+      <label for="eventTime">Actual Event Start Time:</label>
+      <input type="time" id="eventTime" required />
+    </div>
+
+    <div class="form-group">
+      <label for="travelMinutes">Estimated Travel Time (Minutes):</label>
+      <input type="number" id="travelMinutes" min="0" value="20" placeholder="e.g. 20" />
+    </div>
+
+    <div class="form-group">
+      <label for="severity">Bobo Risk Level:</label>
+      <select id="severity">
+        <option value="5">Low: "Just putting my shoes on" (+5 min)</option>
+        <option value="12" selected>Medium: Standard Bobo (+12 min)</option>
+        <option value="20">High: "I can't find my keys" (+20 min)</option>
+        <option value="30">Catastrophic: "Oh, is that today?" (+30 min)</option>
+      </select>
+    </div>
+
+    <button onclick="calculateBoboTime()">Calculate Departure Time</button>
+
+    <div class="result-box" id="resultBox">
+      <div>Tell Bobo you need to leave at:</div>
+      <div class="result-time" id="departureTime">--:--</div>
+      <div id="verdict"></div>
+      <div class="quote" id="boboQuote"></div>
+    </div>
+  </div>
+
+  <script>
+    const quotes = [
+      '"I\'m literally turning onto your street right now!" (Translation: Just left the house)',
+      '"I just need 5 more minutes!" (Translation: 20 minutes remaining)',
+      '"Traffic was crazy today!" (Translation: She spent 15 minutes looking for her sunglasses)',
+      '"I was waiting for you!" (Translation: Complete spatial distortion)'
+    ];
+
+    function calculateBoboTime() {
+      const eventTimeVal = document.getElementById('eventTime').value;
+      const travelMinsVal = document.getElementById('travelMinutes').value;
+      const boboOffset = parseInt(document.getElementById('severity').value, 10);
+
+      if (!eventTimeVal) {
+        alert("Please enter a valid event time!");
+        return;
+      }
+
+      // Parse Travel Time as integer (default to 0 if empty or negative)
+      const travelMinutes = Math.max(0, parseInt(travelMinsVal, 10) || 0);
+
+      // Parse Event Time
+      const [eventHours, eventMinutes] = eventTimeVal.split(':').map(Number);
+
+      // Create Date object based on today
+      let targetDate = new Date();
+      targetDate.setHours(eventHours, eventMinutes, 0, 0);
+
+      // Subtract Travel Time AND Bobo Delay Buffer
+      const totalBufferMinutes = travelMinutes + boboOffset;
+      targetDate.setMinutes(targetDate.getMinutes() - totalBufferMinutes);
+
+      // Format time into AM/PM string
+      let hours = targetDate.getHours();
+      let minutes = targetDate.getMinutes();
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+      hours = hours % 12;
+      hours = hours ? hours : 12; // convert 0 to 12
+      minutes = minutes < 10 ? '0' + minutes : minutes;
+
+      const formattedTime = `${hours}:${minutes} ${ampm}`;
+
+      // Display results
+      document.getElementById('departureTime').innerText = formattedTime;
+      document.getElementById('verdict').innerText = `Includes a ${boboOffset}-minute Bobo Tax on top of your ${travelMinutes}-minute drive.`;
+      document.getElementById('boboQuote').innerText = quotes[Math.floor(Math.random() * quotes.length)];
+      document.getElementById('resultBox').style.display = 'block';
+    }
+  </script>
+</body>
+</html>
